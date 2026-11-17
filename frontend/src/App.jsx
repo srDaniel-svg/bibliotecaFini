@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import SplitText from './components/SplitText';
+import ScrollExpand from './components/ScrollExpand';
 
 async function api(url, method = 'GET', body) {
   const res = await fetch(url, {
@@ -324,9 +325,73 @@ function Reportes() {
   );
 }
 
+/* ---------- Inicio / Portada Institucional ---------- */
+function Inicio({ setTab }) {
+  return (
+    <div className="inicio-view">
+      <div className="scroll-expand-container">
+        <ScrollExpand
+          src="/hero.jpg"
+          alt="Biblioteca Facultativa FINI Yapacaní"
+          title="BIBLIOTECA FINI"
+          scrollHint="Desliza para explorar la biblioteca ↓"
+          mediaZoom={1.25}
+          startWidth={48}
+          startHeight={64}
+          startRadius={24}
+        >
+          <div className="hero-expanded-content">
+            <span className="hero-pill">UAGRM · FACULTAD INTEGRAL DEL ICHILO</span>
+            <h2 className="hero-title">Sistema de Circulación y Kardex Bibliotecario</h2>
+            <p className="hero-desc">
+              Bienvenido al portal bibliotecario de la Sede Central Yapacaní. Consulta
+              disponibilidad de títulos, gestiona tus préstamos a domicilio y revisa las fechas
+              de devolución en tiempo real.
+            </p>
+            <div className="hero-actions">
+              <button className="primario hero-btn" onClick={() => setTab('prestamos')}>
+                Explorar Préstamos Activos →
+              </button>
+              <button className="hero-btn-sec" onClick={() => setTab('nuevo')}>
+                + Solicitar Préstamo
+              </button>
+            </div>
+          </div>
+        </ScrollExpand>
+      </div>
+
+      <div className="inicio-cards-grid">
+        <div className="info-card">
+          <div className="info-icon">🕒</div>
+          <h3>Horario de Atención</h3>
+          <p>Lunes a Viernes</p>
+          <strong>08:00 - 12:00 | 14:00 - 18:00</strong>
+          <small>Atención presencial en sala y préstamos externos para estudiantes.</small>
+        </div>
+
+        <div className="info-card">
+          <div className="info-icon">📍</div>
+          <h3>Ubicación</h3>
+          <p>Campus Universitario FINI</p>
+          <strong>Sede Central Yapacaní</strong>
+          <small>Facultad Integral del Ichilo · Santa Cruz de la Sierra - Bolivia</small>
+        </div>
+
+        <div className="info-card">
+          <div className="info-icon">📜</div>
+          <h3>Condiciones de Préstamo</h3>
+          <p>Préstamo a domicilio por 7 días</p>
+          <strong>Solvencia sin multas</strong>
+          <small>Presentar carnet universitario vigente o documento de identidad.</small>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ---------- App Principal ---------- */
 export default function App() {
-  const [tab, setTab] = useState('prestamos');
+  const [tab, setTab] = useState('inicio');
   const [usuarios, setUsuarios] = useState([]);
   const [libros, setLibros] = useState([]);
   const [prestamos, setPrestamos] = useState([]);
@@ -363,6 +428,7 @@ export default function App() {
   }, [prestamos, libros, usuarios]);
 
   const tabs = [
+    ['inicio', '🏛️ Inicio'],
     ['prestamos', '1. Préstamos Activos'],
     ['nuevo', '2. Nuevo Préstamo (Atómico)'],
     ['libros', '3. Catálogo de Libros'],
@@ -475,6 +541,7 @@ export default function App() {
         </div>
 
         {/* CONTENIDO DE LA PESTAÑA ACTIVA */}
+        {tab === 'inicio' && <Inicio setTab={setTab} />}
         {tab === 'prestamos' && (
           <Prestamos
             key={version}
