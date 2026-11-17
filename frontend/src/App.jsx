@@ -333,9 +333,9 @@ export default function App() {
   const [version, setVersion] = useState(0);
 
   const refrescar = useCallback(() => {
-    api('/api/usuarios').then(setUsuarios).catch(() => {});
-    api('/api/libros').then(setLibros).catch(() => {});
-    api('/api/prestamos').then(setPrestamos).catch(() => {});
+    api('/api/usuarios').then(setUsuarios).catch(() => { });
+    api('/api/libros').then(setLibros).catch(() => { });
+    api('/api/prestamos').then(setPrestamos).catch(() => { });
     setVersion(v => v + 1);
   }, []);
 

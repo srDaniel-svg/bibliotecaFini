@@ -11,11 +11,11 @@
   --ok: #059669;
   --err: #dc2626;
 
-  /* Patrón Isométrico Geométrico (3D Cubes) */
-  --s: 70px;
-  --c1: #e5e9f0;
-  --c2: #eff3f8;
-  --c3: #ffffff;
+  /* Patrón Geométrico Conic Weave */
+  --s: 82px;
+  --c1: #b2b2b2;
+  --c2: #ffffff;
+  --c3: #d9d9d9;
 }
 
 * {
@@ -28,20 +28,25 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.5;
   min-height: 100vh;
-  background-color: #f8fafc;
-  background-image: repeating-conic-gradient(
-        from 30deg,
-        #0000 0 120deg,
-        var(--c3) 0 180deg
-      )
-      calc(0.5 * var(--s)) calc(0.5 * var(--s) * 0.577),
-    repeating-conic-gradient(
-      from 30deg,
-      var(--c1) 0 60deg,
+  background-color: var(--c2);
+  --_g: var(--c3) 0 120deg, #0000 0;
+  background: conic-gradient(from -60deg at 50% calc(100% / 3), var(--_g)),
+    conic-gradient(from 120deg at 50% calc(200% / 3), var(--_g)),
+    conic-gradient(
+      from 60deg at calc(200% / 3),
+      var(--c3) 60deg,
       var(--c2) 0 120deg,
-      var(--c3) 0 180deg
+      #0000 0
+    ),
+    conic-gradient(from 180deg at calc(100% / 3), var(--c1) 60deg, var(--_g)),
+    linear-gradient(
+      90deg,
+      var(--c1) calc(100% / 6),
+      var(--c2) 0 50%,
+      var(--c1) 0 calc(500% / 6),
+      var(--c2) 0
     );
-  background-size: var(--s) calc(var(--s) * 0.577);
+  background-size: calc(1.732 * var(--s)) var(--s);
   background-attachment: fixed;
 }
 
@@ -305,7 +310,8 @@ table {
   font-size: 0.9rem;
 }
 
-th, td {
+th,
+td {
   padding: 12px 14px;
   text-align: left;
   border-bottom: 1px solid #f1f5f9;
@@ -355,7 +361,9 @@ td small {
 }
 
 /* ==================== FORMULARIOS & BOTONES ==================== */
-button, select, input {
+button,
+select,
+input {
   font: inherit;
 }
 
@@ -371,7 +379,8 @@ button {
   align-items: center;
 }
 
-.acciones button, .chips button {
+.acciones button,
+.chips button {
   border: 1px solid var(--borde-suave);
   background: #ffffff;
   color: var(--texto-oscuro);
@@ -381,7 +390,8 @@ button {
   font-weight: 500;
 }
 
-.acciones button:hover, .chips button:hover {
+.acciones button:hover,
+.chips button:hover {
   background: var(--azul-primary);
   color: #fff;
   border-color: var(--azul-primary);
@@ -408,7 +418,8 @@ button {
   cursor: not-allowed;
 }
 
-select, input {
+select,
+input {
   padding: 9px 12px;
   border: 1px solid var(--borde-suave);
   border-radius: 8px;
@@ -417,7 +428,8 @@ select, input {
   font-size: 0.9rem;
 }
 
-select:focus, input:focus {
+select:focus,
+input:focus {
   outline: none;
   border-color: var(--azul-primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
@@ -548,6 +560,7 @@ pre {
     transform: translateY(-10px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -630,10 +643,12 @@ footer.app-footer {
     flex-direction: column;
     align-items: flex-start;
   }
+
   .footer-content {
     flex-direction: column;
     align-items: flex-start;
   }
+
   .footer-right {
     text-align: left;
   }
