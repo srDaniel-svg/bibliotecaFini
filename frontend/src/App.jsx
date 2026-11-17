@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
+import SplitText from './components/SplitText';
 
 async function api(url, method = 'GET', body) {
   const res = await fetch(url, {
@@ -396,7 +397,14 @@ export default function App() {
                 <span className="brand-pill">UAGRM · FINI</span>
                 <span className="brand-ver">v4.2</span>
               </div>
-              <h1 className="brand-title">BIBLIOTECA FACULTATIVA</h1>
+              <h1 className="brand-title">
+                <SplitText
+                  text="BIBLIOTECA FACULTATIVA"
+                  delay={35}
+                  duration={0.6}
+                  ease="power3.out"
+                />
+              </h1>
               <p className="brand-subtitle">
                 Sede Yapacaní · Sistema Registral y Circulación
               </p>
