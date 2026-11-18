@@ -788,3 +788,199 @@ footer.app-footer {
   color: var(--texto-mutado);
   font-size: 0.78rem;
 }
+
+/* ==================== SELECTOR DE TEMA EN HEADER ==================== */
+.header-right {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+/* ==================== MODO OSCURO (FONDO CAMPUS FINI) ==================== */
+html.dark {
+  color-scheme: dark;
+  --azul-header: rgba(7, 14, 32, 0.82);
+  --azul-primary: #3b82f6;
+  --azul-accent: #60a5fa;
+  --rojo-uagrm: #c62828;
+  --texto-oscuro: #e2e8f0;
+  --texto-mutado: #94a3b8;
+  --borde-suave: rgba(148, 163, 184, 0.18);
+
+  /* Superficies tipo vidrio sobre la foto */
+  --sup-1: rgba(13, 24, 48, 0.72);
+  --sup-2: rgba(20, 34, 64, 0.78);
+  --sup-hover: rgba(59, 130, 246, 0.08);
+}
+
+html.dark body {
+  color: var(--texto-oscuro);
+  background-color: #070e20;
+  background: linear-gradient(180deg, rgba(6, 12, 30, 0.45) 0%, rgba(6, 12, 30, 0.7) 60%, rgba(6, 12, 30, 0.88) 100%),
+    url('/fondo-oscuro.webp') center / cover no-repeat fixed;
+}
+
+html.dark header.app-header {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom-color: rgba(96, 165, 250, 0.45);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+}
+
+html.dark footer.app-footer {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top-color: rgba(148, 163, 184, 0.15);
+}
+
+html.dark .kpi-card,
+html.dark section,
+html.dark .info-card {
+  background: var(--sup-1);
+  border-color: var(--borde-suave);
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+html.dark .info-card:hover {
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(96, 165, 250, 0.25);
+}
+
+html.dark .info-card strong {
+  color: var(--azul-accent);
+}
+
+html.dark .nota {
+  background: rgba(59, 130, 246, 0.1);
+  color: #cbd5e1;
+  border-left-color: var(--azul-accent);
+}
+
+/* KPI badges */
+html.dark .kpi-number.alerta { color: #f87171; }
+html.dark .kpi-badge.ok { background: rgba(16, 185, 129, 0.16); color: #6ee7b7; }
+html.dark .kpi-badge.alerta { background: rgba(239, 68, 68, 0.18); color: #fca5a5; }
+html.dark .kpi-badge.info { background: rgba(59, 130, 246, 0.18); color: #93c5fd; }
+
+/* Tablas */
+html.dark .scroll {
+  background: rgba(8, 16, 36, 0.55);
+  border-color: var(--borde-suave);
+}
+
+html.dark th {
+  background: rgba(30, 41, 72, 0.85);
+  color: #a5b4cf;
+  border-bottom-color: var(--borde-suave);
+}
+
+html.dark th,
+html.dark td {
+  border-bottom-color: rgba(148, 163, 184, 0.1);
+}
+
+html.dark tr:hover td {
+  background: var(--sup-hover);
+}
+
+/* Tags */
+html.dark .tag.activo {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fcd34d;
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+html.dark .tag.hecho {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+/* Botones y formularios */
+html.dark .acciones button,
+html.dark .chips button {
+  background: var(--sup-2);
+  color: var(--texto-oscuro);
+  border-color: rgba(148, 163, 184, 0.25);
+}
+
+html.dark .acciones button:hover,
+html.dark .chips button:hover {
+  background: var(--azul-primary);
+  border-color: var(--azul-primary);
+  color: #fff;
+}
+
+html.dark .primario {
+  background: #2563eb;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+}
+
+html.dark .primario:hover:not(:disabled) {
+  background: #3b82f6;
+}
+
+html.dark select,
+html.dark input {
+  background: rgba(8, 16, 36, 0.7);
+  color: var(--texto-oscuro);
+  border-color: rgba(148, 163, 184, 0.25);
+}
+
+html.dark input::placeholder {
+  color: #64748b;
+}
+
+html.dark select:focus,
+html.dark input:focus {
+  border-color: var(--azul-accent);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+html.dark option {
+  background: #0f1b34;
+  color: #e2e8f0;
+}
+
+html.dark fieldset {
+  background: rgba(8, 16, 36, 0.45);
+  border-color: var(--borde-suave);
+}
+
+html.dark .check em {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+}
+
+html.dark .check em.sin {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
+html.dark pre {
+  background: rgba(2, 6, 23, 0.8);
+}
+
+html.dark .scroll-expand-container {
+  border-color: var(--borde-suave);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Transición suave entre temas */
+body,
+header.app-header,
+footer.app-footer,
+section,
+.kpi-card,
+.info-card,
+.scroll,
+th,
+td,
+select,
+input,
+fieldset {
+  transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease,
+    transform 0.2s ease, box-shadow 0.2s ease;
+}

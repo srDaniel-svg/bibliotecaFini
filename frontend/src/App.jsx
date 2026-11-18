@@ -1,6 +1,15 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import SplitText from './components/SplitText';
 import ScrollExpand from './components/ScrollExpand';
+import ThemeSwitch from './components/ThemeSwitch';
+
+function temaInicial() {
+  try {
+    const guardado = localStorage.getItem('tema');
+    if (guardado) return guardado === 'oscuro';
+  } catch { }
+  return false;
+}
 
 async function api(url, method = 'GET', body) {
   const res = await fetch(url, {
@@ -59,7 +68,7 @@ function Prestamos({ usuarios, aviso, refrescar }) {
   const devolver = async id => {
     try {
       await api(`/api/prestamos/${id}/devolver`, 'PUT');
-      aviso('ok', `Préstamo #${id} devuelto con éxito (COMMIT)`);
+      aviso('ok', `Préstamo #${id} devuelto con éxito`);
     } catch (e) {
       aviso('err', e.message, e.rollback);
     }
@@ -71,7 +80,7 @@ function Prestamos({ usuarios, aviso, refrescar }) {
     if (!dest) return;
     try {
       await api(`/api/prestamos/${id}/transferir`, 'PUT', { id_usuario_destino: parseInt(dest) });
-      aviso('ok', `Préstamo #${id} transferido con éxito (COMMIT)`);
+      aviso('ok', `Préstamo #${id} transferido con éxito`);
     } catch (e) {
       aviso('err', e.message, e.rollback);
     }
@@ -81,9 +90,6 @@ function Prestamos({ usuarios, aviso, refrescar }) {
   return (
     <section>
       <h2>Préstamos Registrados</h2>
-      <p className="nota">
-        Consulta relacional con <b>INNER JOIN</b> entre <i>Prestamos</i>, <i>Usuarios</i>, <i>Detalle_Prestamo</i> y <i>Libros</i>.
-      </p>
       <div className="scroll">
         <table>
           <thead>
@@ -160,7 +166,7 @@ function NuevoPrestamo({ usuarios, libros, aviso, refrescar }) {
         id_usuario: parseInt(usuario),
         libros: sel,
       });
-      aviso('ok', `Préstamo #${r.id_prestamo} registrado con éxito (COMMIT)`);
+      aviso('ok', `Préstamo #${r.id_prestamo} registrado con éxito`);
       setSel([]);
       setUsuario('');
     } catch (e) {
@@ -173,8 +179,7 @@ function NuevoPrestamo({ usuarios, libros, aviso, refrescar }) {
     <section>
       <h2>Registrar Nuevo Préstamo</h2>
       <p className="nota">
-        Se ejecuta en una <b>transacción atómica</b>: crea el préstamo, descuenta stock y guarda el detalle.
-        Si algún libro no tiene stock disponible, se ejecuta un <b>ROLLBACK</b> automático y no se persiste ningún cambio.
+        El préstamo descuenta el stock automáticamente. Si algún libro no tiene disponibilidad, no se registra ningún cambio.
       </p>
       <label>
         Usuario Solicitante
@@ -306,7 +311,7 @@ function Reportes() {
   const abrir = id => api('/api/reportes/' + id).then(setData);
   return (
     <section>
-      <h2>Reportes y Consultas SQL</h2>
+      <h2>Reportes y Consultas</h2>
       <div className="chips">
         {lista.map(r => (
           <button key={r.id} onClick={() => abrir(r.id)}>
@@ -317,7 +322,6 @@ function Reportes() {
       {data && (
         <>
           <h3>{data.titulo}</h3>
-          <pre>{data.sql}</pre>
           <Tabla rows={data.rows} />
         </>
       )}
@@ -397,6 +401,14 @@ export default function App() {
   const [prestamos, setPrestamos] = useState([]);
   const [msg, setMsg] = useState(null);
   const [version, setVersion] = useState(0);
+  const [oscuro, setOscuro] = useState(temaInicial);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', oscuro);
+    try {
+      localStorage.setItem('tema', oscuro ? 'oscuro' : 'claro');
+    } catch { }
+  }, [oscuro]);
 
   const refrescar = useCallback(() => {
     api('/api/usuarios').then(setUsuarios).catch(() => { });
@@ -410,7 +422,7 @@ export default function App() {
   }, [refrescar]);
 
   const aviso = (tipo, texto, rollback) => {
-    setMsg({ tipo, texto: rollback ? `${texto} → ROLLBACK ejecutado` : texto });
+    setMsg({ tipo, texto: rollback ? `${texto} — operación revertida` : texto });
     setTimeout(() => setMsg(null), 6000);
   };
 
@@ -430,10 +442,10 @@ export default function App() {
   const tabs = [
     ['inicio', '🏛️ Inicio'],
     ['prestamos', '1. Préstamos Activos'],
-    ['nuevo', '2. Nuevo Préstamo (Atómico)'],
+    ['nuevo', '2. Nuevo Préstamo'],
     ['libros', '3. Catálogo de Libros'],
     ['usuarios', '4. Directorio de Usuarios'],
-    ['reportes', '5. Reportes SQL'],
+    ['reportes', '5. Reportes'],
   ];
 
   return (
@@ -477,18 +489,21 @@ export default function App() {
             </div>
           </div>
 
-          {/* Navegación por pestañas */}
-          <nav className="header-nav">
-            {tabs.map(([k, n]) => (
-              <button
-                key={k}
-                className={tab === k ? 'on' : ''}
-                onClick={() => setTab(k)}
-              >
-                {n}
-              </button>
-            ))}
-          </nav>
+          {/* Navegación por pestañas + selector de tema */}
+          <div className="header-right">
+            <nav className="header-nav">
+              {tabs.map(([k, n]) => (
+                <button
+                  key={k}
+                  className={tab === k ? 'on' : ''}
+                  onClick={() => setTab(k)}
+                >
+                  {n}
+                </button>
+              ))}
+            </nav>
+            <ThemeSwitch checked={oscuro} onChange={setOscuro} />
+          </div>
         </div>
       </header>
 

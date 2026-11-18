@@ -7,13 +7,20 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const useWindowsAuth = !process.env.DB_USER;
 const config = {
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+  ...(useWindowsAuth ? {} : {
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+  }),
   server: process.env.DB_SERVER || 'localhost',
   port: parseInt(process.env.DB_PORT || '1433'),
   database: process.env.DB_DATABASE || 'Biblioteca',
-  options: { encrypt: false, trustServerCertificate: true },
+  options: {
+    encrypt: false,
+    trustServerCertificate: true,
+    ...(useWindowsAuth ? { trustedConnection: true } : {}),
+  },
 };
 const poolPromise = new sql.ConnectionPool(config).connect()
   .then(p => { console.log('✔ Conectado a SQL Server'); return p; })
@@ -143,7 +150,7 @@ app.put('/api/prestamos/:id/transferir', wrap(async (req, res) => {
 // ---------- REPORTES (consultas con JOIN) ----------
 const REPORTES = {
   pendientes: {
-    titulo: 'Préstamos pendientes (INNER JOIN)',
+    titulo: 'Préstamos pendientes',
     sql: `SELECT p.id_prestamo, u.nombre AS usuario, u.telefono, l.titulo, p.fecha_salida
 FROM Prestamos p
 INNER JOIN Usuarios u         ON u.id_usuario = p.id_usuario
@@ -153,7 +160,7 @@ WHERE p.fecha_devolucion IS NULL
 ORDER BY p.fecha_salida`,
   },
   masPrestados: {
-    titulo: 'Libros más prestados (LEFT JOIN + GROUP BY)',
+    titulo: 'Libros más prestados',
     sql: `SELECT l.titulo, l.autor, COUNT(d.id_prestamo) AS veces_prestado
 FROM Libros l
 LEFT JOIN Detalle_Prestamo d ON d.id_libro = l.id_libro
@@ -161,7 +168,7 @@ GROUP BY l.titulo, l.autor
 ORDER BY veces_prestado DESC`,
   },
   porUsuario: {
-    titulo: 'Préstamos por usuario (LEFT JOIN + GROUP BY)',
+    titulo: 'Préstamos por usuario',
     sql: `SELECT u.nombre, COUNT(p.id_prestamo) AS total_prestamos
 FROM Usuarios u
 LEFT JOIN Prestamos p ON p.id_usuario = u.id_usuario
@@ -169,14 +176,14 @@ GROUP BY u.nombre
 ORDER BY total_prestamos DESC`,
   },
   sinPrestamos: {
-    titulo: 'Usuarios que nunca han pedido un libro (LEFT JOIN + IS NULL)',
+    titulo: 'Usuarios sin préstamos registrados',
     sql: `SELECT u.id_usuario, u.nombre, u.telefono
 FROM Usuarios u
 LEFT JOIN Prestamos p ON p.id_usuario = u.id_usuario
 WHERE p.id_prestamo IS NULL`,
   },
   stockBajo: {
-    titulo: 'Libros con poco stock y cuántos están prestados (HAVING)',
+    titulo: 'Libros con poco stock',
     sql: `SELECT l.titulo, l.stock,
        SUM(CASE WHEN d.estado_libro = 'Prestado' THEN 1 ELSE 0 END) AS prestados_ahora
 FROM Libros l
