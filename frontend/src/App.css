@@ -84,15 +84,24 @@ header.app-header {
   gap: 16px;
 }
 
-/* Contenedor blanco para logos para máximo contraste */
+/* Contenedor tipo cristal para logos (adaptable a ambos modos) */
 .logo-badge {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: #ffffff;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   padding: 6px 14px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
+}
+
+.logo-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12), inset 0 1px 1px rgba(255, 255, 255, 1);
 }
 
 .logo-img {
@@ -101,12 +110,14 @@ header.app-header {
   max-width: 80px;
   object-fit: contain;
   display: block;
+  transition: filter 0.3s ease, transform 0.2s ease;
 }
 
 .logo-divider {
   width: 1px;
   height: 28px;
   background: #cbd5e1;
+  transition: background 0.3s ease;
 }
 
 .brand-info {
@@ -614,9 +625,14 @@ footer.app-footer {
   height: 38px;
   width: auto;
   object-fit: contain;
-  background: #ffffff;
-  padding: 4px 8px;
-  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 5px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
 }
 
 .footer-left strong {
@@ -868,6 +884,47 @@ html.dark .kpi-title {
 html.dark .kpi-number {
   color: #ffffff;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* Contenedores de logos tipo cristal en modo oscuro */
+html.dark .logo-badge {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 100%),
+              rgba(11, 23, 48, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+}
+
+html.dark .logo-badge:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 100%),
+              rgba(11, 23, 48, 0.55);
+  border-color: rgba(96, 165, 250, 0.45);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.35);
+}
+
+html.dark .logo-divider {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+html.dark .logo-img {
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5)) brightness(1.05);
+}
+
+html.dark .footer-logo {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 100%),
+              rgba(11, 23, 48, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.4)) brightness(1.05);
+}
+
+html.dark .footer-logo:hover {
+  border-color: rgba(96, 165, 250, 0.4);
 }
 
 html.dark section,
