@@ -205,13 +205,21 @@ main {
 }
 
 .kpi-card {
-  background: #ffffff;
-  border: 1px solid var(--borde-suave);
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 14px;
   padding: 16px 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.9);
   display: flex;
   flex-direction: column;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.3s ease, border-color 0.25s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08), inset 0 1px 1px rgba(255, 255, 255, 1);
 }
 
 .kpi-title {
@@ -817,7 +825,7 @@ html.dark {
 html.dark body {
   color: var(--texto-oscuro);
   background-color: #070e20;
-  background: linear-gradient(180deg, rgba(6, 12, 30, 0.45) 0%, rgba(6, 12, 30, 0.7) 60%, rgba(6, 12, 30, 0.88) 100%),
+  background: linear-gradient(180deg, rgba(6, 12, 30, 0.25) 0%, rgba(6, 12, 30, 0.55) 50%, rgba(6, 12, 30, 0.85) 100%),
     url('/fondo-oscuro.webp') center / cover no-repeat fixed;
 }
 
@@ -834,7 +842,34 @@ html.dark footer.app-footer {
   border-top-color: rgba(148, 163, 184, 0.15);
 }
 
-html.dark .kpi-card,
+/* Tarjetas KPI con efecto cristal (Glassmorphism translúcido) */
+html.dark .kpi-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.03) 100%),
+              rgba(10, 20, 42, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-top: 1px solid rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.22);
+}
+
+html.dark .kpi-card:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.06) 100%),
+              rgba(10, 20, 42, 0.42);
+  border-color: rgba(96, 165, 250, 0.45);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.35);
+}
+
+html.dark .kpi-title {
+  color: #cbd5e1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+html.dark .kpi-number {
+  color: #ffffff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
 html.dark section,
 html.dark .info-card {
   background: var(--sup-1);
