@@ -28,7 +28,24 @@ async function api(url, method = 'GET', body) {
   return data;
 }
 
-const fmt = d => (d ? String(d).slice(0, 10) : '—');
+// Reduce una imagen (dataURL) a máx. 1600 px por lado, para que se suba rápido
+function reducirImagen(dataUrl, max = 1600) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * k);
+      c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      resolve(c.toDataURL('image/jpeg', 0.88));
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
+const fmt = d =>(d ? String(d).slice(0, 10) : '—');
 
 function Tabla({ rows }) {
   if (!rows || !rows.length) return <p className="vacio">No hay datos todavía.</p>;
@@ -114,7 +131,7 @@ function Prestamos({ usuarios, aviso, refrescar }) {
                   <td>{r.usuario}</td>
                   <td>
                     <div className="libro-celda">
-                      <Portada titulo={r.titulo} autor={r.autor} mini />
+                      <Portada titulo={r.titulo} autor={r.autor} mini portada_url={r.portada_url} />
                       <div>
                         {r.titulo}
                         <small>{r.autor}</small>
@@ -206,7 +223,7 @@ function NuevoPrestamo({ usuarios, libros, aviso, refrescar }) {
               checked={sel.includes(l.id_libro)}
               onChange={() => toggle(l.id_libro)}
             />
-            <Portada titulo={l.titulo} autor={l.autor} mini className="check-portada" />
+            <Portada titulo={l.titulo} autor={l.autor} mini portada_url={l.portada_url} className="check-portada" />
             <span>
               {l.titulo} <small>{l.autor}</small>
             </span>
@@ -229,9 +246,12 @@ function NuevoPrestamo({ usuarios, libros, aviso, refrescar }) {
 
 /* ---------- Libros / Usuarios ---------- */
 function Libros({ libros, aviso, refrescar }) {
-  const [f, setF] = useState({ titulo: '', autor: '', stock: 1 });
+  const [f, setF] = useState({ titulo: '', autor: '', stock: 1, imagen_base64: '' });
+  const [cargando, setCargando] = useState(false);
+  const [preview, setPreview] = useState(null);
   const [q, setQ] = useState('');
   const [abierto, setAbierto] = useState(null);
+  const [nuevo, setNuevo] = useState(false);
   const visibles = useMemo(() => {
     const t = normalizar(q);
     return t
@@ -246,40 +266,149 @@ function Libros({ libros, aviso, refrescar }) {
     return () => window.removeEventListener('keydown', esc);
   }, [abierto]);
 
+  useEffect(() => {
+    if (!nuevo) return;
+    const esc = e => e.key === 'Escape' && !cargando && cerrarNuevo();
+    window.addEventListener('keydown', esc);
+    return () => window.removeEventListener('keydown', esc);
+  });
+
+  const cerrarNuevo = () => {
+    setNuevo(false);
+    setF({ titulo: '', autor: '', stock: 1, imagen_base64: '' });
+    setPreview(null);
+  };
+
+  const onSeleccionarImagen = e => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
+      aviso('err', 'Formato no válido. Usa JPG, PNG o WebP');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = async ev => {
+      let data = ev.target.result;
+      // Sin límite de tamaño: las fotos muy pesadas se reducen solas antes de enviarlas
+      if (file.size > 2 * 1024 * 1024) data = await reducirImagen(data);
+      setPreview(data);
+      setF(prev => ({ ...prev, imagen_base64: data }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const quitarImagen = () => {
+    setPreview(null);
+    setF(prev => ({ ...prev, imagen_base64: '' }));
+  };
+
   const guardar = async e => {
     e.preventDefault();
+    setCargando(true);
     try {
       await api('/api/libros', 'POST', f);
-      aviso('ok', 'Libro agregado al catálogo');
-      setF({ titulo: '', autor: '', stock: 1 });
+      aviso('ok', f.imagen_base64 ? 'Libro agregado con portada en Cloudinary ☁️' : 'Libro agregado al catálogo');
+      cerrarNuevo();
     } catch (er) {
       aviso('err', er.message);
+    } finally {
+      setCargando(false);
     }
     refrescar();
   };
   return (
     <section>
-      <h2>Catálogo de Libros</h2>
-      <form className="fila" onSubmit={guardar}>
-        <input
-          placeholder="Título del libro"
-          value={f.titulo}
-          onChange={e => setF({ ...f, titulo: e.target.value })}
-        />
-        <input
-          placeholder="Autor"
-          value={f.autor}
-          onChange={e => setF({ ...f, autor: e.target.value })}
-        />
-        <input
-          type="number"
-          min="0"
-          style={{ width: 100 }}
-          value={f.stock}
-          onChange={e => setF({ ...f, stock: e.target.value })}
-        />
-        <button className="primario">+ Agregar libro</button>
-      </form>
+      <div className="catalogo-head">
+        <div>
+          <span className="catalogo-eyebrow">Colección institucional</span>
+          <h2>Catálogo de libros</h2>
+          <p>Consulta la colección, revisa existencias y registra nuevos ejemplares con su portada.</p>
+        </div>
+        <button className="primario btn-agregar" onClick={() => setNuevo(true)}>
+          <span aria-hidden="true">+</span> Agregar libro
+        </button>
+      </div>
+
+      {nuevo && (
+        <div className="visor" onClick={() => !cargando && cerrarNuevo()} role="dialog" aria-modal="true" aria-labelledby="nuevo-libro-titulo">
+          <form className="modal-libro" onClick={e => e.stopPropagation()} onSubmit={guardar}>
+            <div className="modal-libro-head">
+              <div>
+                <span className="catalogo-eyebrow">Nuevo registro</span>
+                <h3 id="nuevo-libro-titulo">Agregar libro al catálogo</h3>
+              </div>
+              <button type="button" className="modal-libro-cerrar" onClick={cerrarNuevo} disabled={cargando} aria-label="Cerrar">×</button>
+            </div>
+
+            <div className="modal-libro-body">
+              <div className="modal-libro-portada">
+                <Portada
+                  titulo={f.titulo || 'Título del libro'}
+                  autor={f.autor || 'Nombre del autor'}
+                  portada_url={preview}
+                />
+                {preview ? (
+                  <div className="modal-libro-acciones-img">
+                    <label className="btn-upload-portada">
+                      Cambiar
+                      <input type="file" accept="image/jpeg,image/png,image/webp" onChange={onSeleccionarImagen} hidden />
+                    </label>
+                    <button type="button" className="btn-quitar-portada" onClick={quitarImagen}>Quitar</button>
+                  </div>
+                ) : (
+                  <label className="btn-upload-portada">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+                    </svg>
+                    Subir portada
+                    <input type="file" accept="image/jpeg,image/png,image/webp" onChange={onSeleccionarImagen} hidden />
+                  </label>
+                )}
+                <small>JPG, PNG o WebP</small>
+              </div>
+
+              <div className="modal-libro-campos">
+                <label>
+                  Título del libro
+                  <input
+                    autoFocus
+                    placeholder="Ej. El laberinto de la soledad"
+                    value={f.titulo}
+                    onChange={e => setF({ ...f, titulo: e.target.value })}
+                    required
+                  />
+                </label>
+                <label>
+                  Autor
+                  <input
+                    placeholder="Nombre completo"
+                    value={f.autor}
+                    onChange={e => setF({ ...f, autor: e.target.value })}
+                  />
+                </label>
+                <label>
+                  Ejemplares
+                  <input
+                    type="number"
+                    min="0"
+                    value={f.stock}
+                    onChange={e => setF({ ...f, stock: e.target.value })}
+                  />
+                </label>
+                <div className="modal-libro-pie">
+                  <button type="button" className="btn-cancelar" onClick={cerrarNuevo} disabled={cargando}>
+                    Cancelar
+                  </button>
+                  <button className="primario" disabled={cargando}>
+                    {cargando ? 'Subiendo…' : '+ Guardar libro'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      )}
 
       <div className="estante-barra">
         <input
@@ -296,7 +425,7 @@ function Libros({ libros, aviso, refrescar }) {
           {visibles.map(l => (
             <button key={l.id_libro} className="libro-card" onClick={() => setAbierto(l)}>
               <div className="libro-3d">
-                <Portada titulo={l.titulo} autor={l.autor} />
+                <Portada titulo={l.titulo} autor={l.autor} portada_url={l.portada_url} />
                 <span className={'libro-stock ' + (l.stock === 0 ? 'sin' : l.stock <= 1 ? 'bajo' : '')}>
                   {l.stock === 0 ? 'Agotado' : `${l.stock} disp.`}
                 </span>
@@ -315,7 +444,7 @@ function Libros({ libros, aviso, refrescar }) {
           <div className="visor-caja" onClick={e => e.stopPropagation()}>
             <button className="visor-cerrar" onClick={() => setAbierto(null)} aria-label="Cerrar">×</button>
             <div className="visor-portada">
-              <Portada titulo={abierto.titulo} autor={abierto.autor} />
+              <Portada titulo={abierto.titulo} autor={abierto.autor} portada_url={abierto.portada_url} />
             </div>
             <div className="visor-info">
               <span className="brand-pill">Libro #{abierto.id_libro}</span>
