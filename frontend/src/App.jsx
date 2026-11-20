@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import SplitText from './components/SplitText';
 import ScrollExpand from './components/ScrollExpand';
 import ThemeSwitch from './components/ThemeSwitch';
+import Portada from './components/Portada';
+import { normalizar } from './portadas';
 
 function temaInicial() {
   try {
@@ -111,8 +113,13 @@ function Prestamos({ usuarios, aviso, refrescar }) {
                   <td><b>#{r.id_prestamo}</b></td>
                   <td>{r.usuario}</td>
                   <td>
-                    {r.titulo}
-                    <small>{r.autor}</small>
+                    <div className="libro-celda">
+                      <Portada titulo={r.titulo} autor={r.autor} mini />
+                      <div>
+                        {r.titulo}
+                        <small>{r.autor}</small>
+                      </div>
+                    </div>
                   </td>
                   <td>{fmt(r.fecha_salida)}</td>
                   <td>{fmt(r.fecha_devolucion)}</td>
@@ -178,9 +185,6 @@ function NuevoPrestamo({ usuarios, libros, aviso, refrescar }) {
   return (
     <section>
       <h2>Registrar Nuevo Préstamo</h2>
-      <p className="nota">
-        El préstamo descuenta el stock automáticamente. Si algún libro no tiene disponibilidad, no se registra ningún cambio.
-      </p>
       <label>
         Usuario Solicitante
         <select value={usuario} onChange={e => setUsuario(e.target.value)}>
@@ -202,6 +206,7 @@ function NuevoPrestamo({ usuarios, libros, aviso, refrescar }) {
               checked={sel.includes(l.id_libro)}
               onChange={() => toggle(l.id_libro)}
             />
+            <Portada titulo={l.titulo} autor={l.autor} mini className="check-portada" />
             <span>
               {l.titulo} <small>{l.autor}</small>
             </span>
@@ -225,6 +230,22 @@ function NuevoPrestamo({ usuarios, libros, aviso, refrescar }) {
 /* ---------- Libros / Usuarios ---------- */
 function Libros({ libros, aviso, refrescar }) {
   const [f, setF] = useState({ titulo: '', autor: '', stock: 1 });
+  const [q, setQ] = useState('');
+  const [abierto, setAbierto] = useState(null);
+  const visibles = useMemo(() => {
+    const t = normalizar(q);
+    return t
+      ? libros.filter(l => normalizar(l.titulo + ' ' + l.autor).includes(t))
+      : libros;
+  }, [libros, q]);
+
+  useEffect(() => {
+    if (!abierto) return;
+    const esc = e => e.key === 'Escape' && setAbierto(null);
+    window.addEventListener('keydown', esc);
+    return () => window.removeEventListener('keydown', esc);
+  }, [abierto]);
+
   const guardar = async e => {
     e.preventDefault();
     try {
@@ -259,7 +280,56 @@ function Libros({ libros, aviso, refrescar }) {
         />
         <button className="primario">+ Agregar libro</button>
       </form>
-      <Tabla rows={libros} />
+
+      <div className="estante-barra">
+        <input
+          type="search"
+          placeholder="🔍 Buscar por título o autor…"
+          value={q}
+          onChange={e => setQ(e.target.value)}
+        />
+        <span>{visibles.length} de {libros.length} títulos</span>
+      </div>
+
+      {visibles.length ? (
+        <div className="estante">
+          {visibles.map(l => (
+            <button key={l.id_libro} className="libro-card" onClick={() => setAbierto(l)}>
+              <div className="libro-3d">
+                <Portada titulo={l.titulo} autor={l.autor} />
+                <span className={'libro-stock ' + (l.stock === 0 ? 'sin' : l.stock <= 1 ? 'bajo' : '')}>
+                  {l.stock === 0 ? 'Agotado' : `${l.stock} disp.`}
+                </span>
+              </div>
+              <strong>{l.titulo}</strong>
+              <small>{l.autor}</small>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <p className="vacio">No hay libros que coincidan.</p>
+      )}
+
+      {abierto && (
+        <div className="visor" onClick={() => setAbierto(null)} role="dialog" aria-modal="true">
+          <div className="visor-caja" onClick={e => e.stopPropagation()}>
+            <button className="visor-cerrar" onClick={() => setAbierto(null)} aria-label="Cerrar">×</button>
+            <div className="visor-portada">
+              <Portada titulo={abierto.titulo} autor={abierto.autor} />
+            </div>
+            <div className="visor-info">
+              <span className="brand-pill">Libro #{abierto.id_libro}</span>
+              <h3>{abierto.titulo}</h3>
+              <p>{abierto.autor}</p>
+              <span className={'tag ' + (abierto.stock > 0 ? 'hecho' : 'activo')}>
+                {abierto.stock > 0
+                  ? `${abierto.stock} ejemplar${abierto.stock === 1 ? '' : 'es'} disponible${abierto.stock === 1 ? '' : 's'}`
+                  : 'Sin ejemplares disponibles'}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

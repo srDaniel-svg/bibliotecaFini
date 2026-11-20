@@ -1076,3 +1076,210 @@ fieldset {
   transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease,
     transform 0.2s ease, box-shadow 0.2s ease;
 }
+
+/* ==================== ESTANTERÍA DE LIBROS (CATÁLOGO) ==================== */
+.libro-celda {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.check .check-portada {
+  width: 34px;
+}
+
+.estante-barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 8px 0 22px;
+}
+
+.estante-barra input {
+  flex: 1 1 260px;
+  max-width: 420px;
+}
+
+.estante-barra span {
+  color: var(--texto-mutado);
+  font-size: 0.85rem;
+}
+
+.estante {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 34px 26px;
+  padding: 6px 4px 18px;
+}
+
+.libro-card {
+  all: unset;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  min-width: 0;
+  border-radius: 10px;
+}
+
+.libro-card:focus-visible {
+  outline: 3px solid var(--azul-accent);
+  outline-offset: 6px;
+}
+
+.libro-3d {
+  position: relative;
+  margin-bottom: 12px;
+  transform-origin: left center;
+  transition: transform 0.35s cubic-bezier(.2, .8, .2, 1), filter 0.35s;
+}
+
+/* Sombra en "repisa" bajo cada libro */
+.libro-3d::after {
+  content: '';
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: -10px;
+  height: 14px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.35), transparent 70%);
+  z-index: -1;
+}
+
+.libro-card:hover .libro-3d,
+.libro-card:focus-visible .libro-3d {
+  transform: perspective(900px) rotateY(-14deg) translateY(-6px) scale(1.03);
+  filter: drop-shadow(14px 14px 18px rgba(0, 0, 0, 0.3));
+}
+
+.libro-stock {
+  position: absolute;
+  top: 8px;
+  right: -6px;
+  background: #059669;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 99px 0 0 99px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+.libro-stock.bajo { background: #d97706; }
+.libro-stock.sin { background: var(--err); }
+
+.libro-card strong {
+  color: var(--texto-oscuro);
+  font-size: 0.88rem;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.libro-card small {
+  color: var(--texto-mutado);
+  font-size: 0.78rem;
+}
+
+/* Visor de portada ampliada */
+.visor {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  animation: visor-in 0.2s ease;
+}
+
+.visor-caja {
+  position: relative;
+  display: flex;
+  gap: 28px;
+  align-items: center;
+  max-width: 760px;
+  width: 100%;
+  max-height: calc(100vh - 32px);
+  background: #fff;
+  color: var(--texto-oscuro);
+  border-radius: 16px;
+  padding: 26px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  animation: visor-pop 0.3s cubic-bezier(.2, .9, .3, 1.2);
+}
+
+html.dark .visor-caja {
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid var(--borde-suave);
+}
+
+.visor-portada {
+  flex: 0 0 min(300px, 45%);
+  transform: perspective(1000px) rotateY(-8deg);
+}
+
+.visor-info h3 {
+  font-size: 1.4rem;
+  line-height: 1.25;
+  margin: 12px 0 6px;
+}
+
+.visor-info p {
+  color: var(--texto-mutado);
+  margin: 0 0 16px;
+}
+
+.visor-cerrar {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--borde-suave);
+  background: transparent;
+  color: var(--texto-oscuro);
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.visor-cerrar:hover {
+  background: var(--rojo-uagrm);
+  color: #fff;
+}
+
+@keyframes visor-in { from { opacity: 0; } }
+@keyframes visor-pop { from { opacity: 0; transform: scale(0.92) translateY(10px); } }
+
+@media (max-width: 600px) {
+  .estante {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 26px 16px;
+  }
+  .visor-caja {
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 20px;
+  }
+  .visor-portada {
+    flex: none;
+    width: min(240px, 70%);
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .libro-3d,
+  .p-ilus .aspas,
+  .visor,
+  .visor-caja {
+    transition: none;
+    animation: none;
+  }
+}

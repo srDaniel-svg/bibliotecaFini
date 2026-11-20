@@ -1,0 +1,250 @@
+/* ==================== PORTADAS DE LIBROS ==================== */
+.portada {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  width: 100%;
+  border-radius: 3px 8px 8px 3px;
+  overflow: hidden;
+  container-type: inline-size;
+  background: #1f2937;
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.2),
+    0 10px 24px -8px rgba(0, 0, 0, 0.45);
+  user-select: none;
+}
+
+/* --- Portadas con foto --- */
+.portada.foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Brillo del lomo para que la foto también parezca un libro */
+.portada.foto::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+      rgba(0, 0, 0, 0.35) 0%,
+      rgba(255, 255, 255, 0.18) 2.5%,
+      rgba(0, 0, 0, 0.12) 5%,
+      transparent 9%);
+  pointer-events: none;
+}
+
+/* --- Portadas dibujadas --- */
+.portada.dibujada {
+  --fondo: linear-gradient(180deg, #1e293b, #0f172a);
+  --gancho: #facc15;
+  --titulo: #ef4444;
+  --texto: #f8fafc;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: 'Anton', 'Impact', 'Arial Narrow Bold', sans-serif;
+}
+
+/* El contenido va en un hijo: así las unidades cqw se miden contra la portada */
+.p-cuerpo {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 7cqw 7cqw 5cqw 10cqw;
+}
+
+.p-lomo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6cqw;
+  background: linear-gradient(90deg,
+      rgba(0, 0, 0, 0.45),
+      rgba(255, 255, 255, 0.15) 45%,
+      rgba(0, 0, 0, 0.3));
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.p-gancho {
+  color: var(--gancho);
+  text-transform: uppercase;
+  font-size: 6.4cqw;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  text-shadow: 0 0.6cqw 0 rgba(0, 0, 0, 0.45);
+}
+
+.p-titulo {
+  color: var(--titulo);
+  text-transform: uppercase;
+  line-height: 0.98;
+  margin-top: 1.5cqw;
+  text-shadow:
+    0 0 0.1px #fff,
+    0.6cqw 0.8cqw 0 rgba(0, 0, 0, 0.5);
+  -webkit-text-stroke: 0.25cqw rgba(255, 255, 255, 0.85);
+  paint-order: stroke fill;
+}
+
+.p-titulo.t-xl { font-size: 26cqw; }
+.p-titulo.t-l { font-size: 12.5cqw; }
+.p-titulo.t-m { font-size: 10cqw; }
+.p-titulo.t-s { font-size: 8cqw; }
+
+.p-sub {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 4.3cqw;
+  line-height: 1.2;
+  margin-top: 2.5cqw;
+  opacity: 0.95;
+}
+
+.p-ilus {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2cqw 0;
+}
+
+.p-ilus svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 1.5cqw 1.5cqw rgba(0, 0, 0, 0.35));
+}
+
+.p-ilus .aspas {
+  animation: giro-aspas 9s linear infinite;
+}
+
+@keyframes giro-aspas {
+  to { transform: rotate(360deg); }
+}
+
+.p-autor {
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+  font-weight: 700;
+  font-size: 7cqw;
+  line-height: 1.1;
+  color: #fff;
+  text-shadow: 0 0.5cqw 1cqw rgba(0, 0, 0, 0.6);
+}
+
+.p-sello {
+  margin-top: 3cqw;
+  padding: 1.8cqw 5cqw;
+  border: 0.5cqw solid rgba(255, 255, 255, 0.75);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+  line-height: 1.15;
+  max-width: 82%;
+}
+
+.p-sello b {
+  display: block;
+  color: var(--gancho);
+  font-size: 3.6cqw;
+  text-transform: uppercase;
+}
+
+.p-sello span {
+  display: block;
+  color: #fff;
+  font-size: 3.2cqw;
+}
+
+/* Desgaste: esquinas gastadas, rayones y brillo, como un libro usado */
+.p-desgaste {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(115deg, transparent 62%, rgba(255, 255, 255, 0.08) 63%, transparent 64%),
+    linear-gradient(160deg, transparent 80%, rgba(255, 255, 255, 0.06) 80.5%, transparent 81.5%),
+    radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.35) 0, transparent 4%),
+    radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.3) 0, transparent 4%),
+    radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.12), transparent 50%);
+  box-shadow:
+    inset 0 0 0 0.6cqw rgba(255, 255, 255, 0.07),
+    inset 0 0 6cqw rgba(0, 0, 0, 0.55);
+}
+
+/* --- Temas de color --- */
+.portada.tema-selva {
+  --fondo: radial-gradient(ellipse at 50% 70%, #3f6212 0%, #1a2e05 55%, #0c1402 100%);
+  --titulo: #facc15;
+  --gancho: #fde68a;
+}
+
+.portada.tema-noche {
+  --fondo: radial-gradient(ellipse at 50% 30%, #312e81 0%, #1e1b4b 50%, #0b0a24 100%);
+  --titulo: #fbbf24;
+  --gancho: #fde047;
+}
+
+.portada.tema-mancha {
+  --fondo: linear-gradient(180deg, #7dd3fc 0%, #fde68a 55%, #d97706 100%);
+  --titulo: #dc2626;
+  --gancho: #1e3a8a;
+  --texto: #1c1917;
+}
+
+.portada.tema-mancha .p-gancho { text-shadow: 0 0.4cqw 0 rgba(255, 255, 255, 0.6); }
+.portada.tema-mancha .p-autor { color: #1c1917; text-shadow: 0 0.4cqw 0 rgba(255, 255, 255, 0.5); }
+
+.portada.tema-vigilancia {
+  --fondo: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 2px, transparent 2px 4px),
+    linear-gradient(180deg, #27272a 0%, #09090b 100%);
+  --titulo: #dc2626;
+  --gancho: #facc15;
+}
+
+.portada.tema-tiza {
+  --fondo: radial-gradient(ellipse at 50% 40%, #334155 0%, #1e293b 60%, #0f172a 100%);
+  --titulo: #fb7185;
+  --gancho: #fde047;
+}
+
+.portada.tema-cuartel {
+  --fondo: linear-gradient(180deg, #44403c 0%, #292524 60%, #1c1917 100%);
+  --titulo: #ef4444;
+  --gancho: #fde047;
+}
+
+.portada.tema-vino {
+  --fondo: radial-gradient(ellipse at 50% 30%, #7f1d1d 0%, #450a0a 60%, #1c0606 100%);
+  --titulo: #fde047;
+  --gancho: #fecaca;
+}
+
+/* --- Miniatura (tablas / listas) --- */
+.portada.mini {
+  width: 44px;
+  flex: 0 0 auto;
+  border-radius: 2px 4px 4px 2px;
+  box-shadow: 0 4px 10px -3px rgba(0, 0, 0, 0.45);
+}
+
+.portada.mini .p-cuerpo {
+  padding: 10cqw 6cqw 6cqw 12cqw;
+  justify-content: center;
+}
+
+.portada.mini .p-gancho,
+.portada.mini .p-sub,
+.portada.mini .p-autor,
+.portada.mini .p-sello {
+  display: none;
+}
+
+.portada.mini .p-titulo.t-xl { font-size: 30cqw; }
+.portada.mini .p-titulo.t-l,
+.portada.mini .p-titulo.t-m,
+.portada.mini .p-titulo.t-s { font-size: 16cqw; -webkit-text-stroke: 0; }
