@@ -114,7 +114,7 @@ function Prestamos({ usuarios, aviso, refrescar }) {
                   <td>{r.usuario}</td>
                   <td>
                     <div className="libro-celda">
-                      <Portada titulo={r.titulo} autor={r.autor} mini />
+                      <Portada titulo={r.titulo} autor={r.autor} mini portada_url={r.portada_url} />
                       <div>
                         {r.titulo}
                         <small>{r.autor}</small>
@@ -206,7 +206,7 @@ function NuevoPrestamo({ usuarios, libros, aviso, refrescar }) {
               checked={sel.includes(l.id_libro)}
               onChange={() => toggle(l.id_libro)}
             />
-            <Portada titulo={l.titulo} autor={l.autor} mini className="check-portada" />
+            <Portada titulo={l.titulo} autor={l.autor} mini portada_url={l.portada_url} className="check-portada" />
             <span>
               {l.titulo} <small>{l.autor}</small>
             </span>
@@ -229,7 +229,9 @@ function NuevoPrestamo({ usuarios, libros, aviso, refrescar }) {
 
 /* ---------- Libros / Usuarios ---------- */
 function Libros({ libros, aviso, refrescar }) {
-  const [f, setF] = useState({ titulo: '', autor: '', stock: 1 });
+  const [f, setF] = useState({ titulo: '', autor: '', stock: 1, imagen_base64: '' });
+  const [cargando, setCargando] = useState(false);
+  const [preview, setPreview] = useState(null);
   const [q, setQ] = useState('');
   const [abierto, setAbierto] = useState(null);
   const visibles = useMemo(() => {
@@ -246,25 +248,50 @@ function Libros({ libros, aviso, refrescar }) {
     return () => window.removeEventListener('keydown', esc);
   }, [abierto]);
 
+  const onSeleccionarImagen = e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      aviso('err', 'La imagen no debe superar los 8MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      setPreview(ev.target.result);
+      setF(prev => ({ ...prev, imagen_base64: ev.target.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const quitarImagen = () => {
+    setPreview(null);
+    setF(prev => ({ ...prev, imagen_base64: '' }));
+  };
+
   const guardar = async e => {
     e.preventDefault();
+    setCargando(true);
     try {
       await api('/api/libros', 'POST', f);
-      aviso('ok', 'Libro agregado al catálogo');
-      setF({ titulo: '', autor: '', stock: 1 });
+      aviso('ok', f.imagen_base64 ? 'Libro agregado con portada en Cloudinary ☁️' : 'Libro agregado al catálogo');
+      setF({ titulo: '', autor: '', stock: 1, imagen_base64: '' });
+      setPreview(null);
     } catch (er) {
       aviso('err', er.message);
+    } finally {
+      setCargando(false);
     }
     refrescar();
   };
   return (
     <section>
       <h2>Catálogo de Libros</h2>
-      <form className="fila" onSubmit={guardar}>
+      <form className="fila form-libro" onSubmit={guardar}>
         <input
           placeholder="Título del libro"
           value={f.titulo}
           onChange={e => setF({ ...f, titulo: e.target.value })}
+          required
         />
         <input
           placeholder="Autor"
@@ -274,11 +301,24 @@ function Libros({ libros, aviso, refrescar }) {
         <input
           type="number"
           min="0"
-          style={{ width: 100 }}
+          style={{ width: 90 }}
           value={f.stock}
           onChange={e => setF({ ...f, stock: e.target.value })}
+          title="Stock"
         />
-        <button className="primario">+ Agregar libro</button>
+        <label className="btn-upload-portada" title="Subir portada a Cloudinary">
+          <span>📷 {preview ? 'Cambiar foto' : 'Subir Portada'}</span>
+          <input type="file" accept="image/*" onChange={onSeleccionarImagen} style={{ display: 'none' }} />
+        </label>
+        {preview && (
+          <div className="preview-chip">
+            <img src={preview} alt="Vista previa" />
+            <button type="button" onClick={quitarImagen} title="Quitar imagen">×</button>
+          </div>
+        )}
+        <button className="primario" disabled={cargando}>
+          {cargando ? '☁️ Subiendo...' : '+ Agregar libro'}
+        </button>
       </form>
 
       <div className="estante-barra">
@@ -296,7 +336,7 @@ function Libros({ libros, aviso, refrescar }) {
           {visibles.map(l => (
             <button key={l.id_libro} className="libro-card" onClick={() => setAbierto(l)}>
               <div className="libro-3d">
-                <Portada titulo={l.titulo} autor={l.autor} />
+                <Portada titulo={l.titulo} autor={l.autor} portada_url={l.portada_url} />
                 <span className={'libro-stock ' + (l.stock === 0 ? 'sin' : l.stock <= 1 ? 'bajo' : '')}>
                   {l.stock === 0 ? 'Agotado' : `${l.stock} disp.`}
                 </span>
@@ -315,7 +355,7 @@ function Libros({ libros, aviso, refrescar }) {
           <div className="visor-caja" onClick={e => e.stopPropagation()}>
             <button className="visor-cerrar" onClick={() => setAbierto(null)} aria-label="Cerrar">×</button>
             <div className="visor-portada">
-              <Portada titulo={abierto.titulo} autor={abierto.autor} />
+              <Portada titulo={abierto.titulo} autor={abierto.autor} portada_url={abierto.portada_url} />
             </div>
             <div className="visor-info">
               <span className="brand-pill">Libro #{abierto.id_libro}</span>

@@ -1283,3 +1283,72 @@ html.dark .visor-caja {
     animation: none;
   }
 }
+
+/* ==================== SUBIDA DE PORTADAS A CLOUDINARY ==================== */
+.btn-upload-portada {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--azul-primary);
+  border: 1px dashed rgba(59, 130, 246, 0.4);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-upload-portada:hover {
+  background: rgba(59, 130, 246, 0.18);
+  border-color: var(--azul-primary);
+  transform: translateY(-1px);
+}
+
+.preview-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 4px 8px 4px 6px;
+  border-radius: 8px;
+}
+
+.preview-chip img {
+  width: 28px;
+  height: 38px;
+  object-fit: cover;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.preview-chip button {
+  background: transparent;
+  border: none;
+  color: var(--err);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+html.dark .btn-upload-portada {
+  background: rgba(59, 130, 246, 0.16);
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.4);
+}
+
+html.dark .btn-upload-portada:hover {
+  background: rgba(59, 130, 246, 0.28);
+  border-color: #60a5fa;
+}
+
+html.dark .preview-chip {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(52, 211, 153, 0.4);
+  color: #a7f3d0;
+}

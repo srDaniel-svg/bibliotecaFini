@@ -169,9 +169,19 @@ function tamTitulo(t) {
  *   y cualquier libro nuevo con una portada generada a partir del título).
  * mini: versión miniatura para tablas y listas (oculta los textos pequeños).
  */
-export default function Portada({ titulo, autor, mini = false, className = '' }) {
-  const p = buscarPortada(titulo);
+export default function Portada({ titulo, autor, mini = false, className = '', portada_url, portadaUrl }) {
+  const url = portada_url || portadaUrl;
   const cls = `portada${mini ? ' mini' : ''} ${className}`;
+
+  if (url) {
+    return (
+      <div className={cls + ' foto'}>
+        <img src={url} alt={`Portada de ${titulo}`} loading="lazy" draggable="false" />
+      </div>
+    );
+  }
+
+  const p = buscarPortada(titulo);
 
   if (p.tipo === 'img') {
     return (

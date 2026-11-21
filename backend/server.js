@@ -2,10 +2,21 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const sql = require('mssql');
+const cloudinary = require('cloudinary').v2;
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ extended: true, limit: '15mb' }));
+
+if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+  console.log(`✔ Cloudinary conectado (${process.env.CLOUDINARY_CLOUD_NAME})`);
+}
 
 const useWindowsAuth = !process.env.DB_USER;
 const config = {
@@ -74,16 +85,46 @@ app.get('/api/libros', wrap(async (_q, res) =>
   res.json(await run('SELECT * FROM Libros ORDER BY id_libro'))));
 
 app.post('/api/libros', wrap(async (req, res) => {
-  const { titulo, autor, stock } = req.body;
+  let { titulo, autor, stock, portada_url, imagen_base64 } = req.body;
   if (!titulo) throw new Error('El título es obligatorio');
-  await run('INSERT INTO Libros (titulo, autor, stock) VALUES (@titulo, @autor, @stock)',
-    { titulo, autor, stock: parseInt(stock) || 0 });
-  res.json({ ok: true });
+
+  // Si enviaron una imagen en Base64, subirla directamente a Cloudinary
+  if (imagen_base64 && process.env.CLOUDINARY_CLOUD_NAME) {
+    try {
+      const uploadRes = await cloudinary.uploader.upload(imagen_base64, {
+        folder: 'biblioteca_fini/portadas',
+      });
+      portada_url = uploadRes.secure_url;
+    } catch (e) {
+      console.error('Error al subir imagen a Cloudinary:', e.message);
+    }
+  }
+
+  await run(
+    'INSERT INTO Libros (titulo, autor, stock, portada_url) VALUES (@titulo, @autor, @stock, @portada_url)',
+    {
+      titulo,
+      autor,
+      stock: parseInt(stock) || 0,
+      portada_url: portada_url || null,
+    }
+  );
+  res.json({ ok: true, portada_url });
+}));
+
+// Endpoint auxiliar para subir imagen a Cloudinary por separado si se desea
+app.post('/api/upload', wrap(async (req, res) => {
+  const { imagen } = req.body;
+  if (!imagen) throw new Error('No se recibió ninguna imagen');
+  const uploadRes = await cloudinary.uploader.upload(imagen, {
+    folder: 'biblioteca_fini/portadas',
+  });
+  res.json({ ok: true, url: uploadRes.secure_url });
 }));
 
 // ---------- PRÉSTAMOS (JOIN de las 4 tablas) ----------
 const SQL_PRESTAMOS = `
-SELECT p.id_prestamo, u.id_usuario, u.nombre AS usuario, l.titulo, l.autor,
+SELECT p.id_prestamo, u.id_usuario, u.nombre AS usuario, l.titulo, l.autor, l.portada_url,
        p.fecha_salida, p.fecha_devolucion, d.estado_libro
 FROM Prestamos p
 INNER JOIN Usuarios u         ON u.id_usuario = p.id_usuario
