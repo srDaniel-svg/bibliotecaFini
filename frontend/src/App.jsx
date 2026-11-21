@@ -318,17 +318,21 @@ function Libros({ libros, aviso, refrescar }) {
     refrescar();
   };
   return (
-    <section>
-      <div className="catalogo-head">
-        <div>
-          <span className="catalogo-eyebrow">Colección institucional</span>
-          <h2>Catálogo de libros</h2>
-          <p>Consulta la colección, revisa existencias y registra nuevos ejemplares con su portada.</p>
+    <div className="catalogo-wrapper">
+      <div className="catalogo-banner">
+        <div className="catalogo-banner-info">
+          <span className="catalogo-eyebrow">COLECCIÓN INSTITUCIONAL</span>
+          <h2 className="catalogo-titulo">Catálogo de libros</h2>
+          <p className="catalogo-desc">
+            Consulta la colección, revisa existencias y registra nuevos ejemplares con su portada.
+          </p>
         </div>
         <button className="primario btn-agregar" onClick={() => setNuevo(true)}>
-          <span aria-hidden="true">+</span> Agregar libro
+          + Agregar libro
         </button>
       </div>
+
+      <section className="catalogo-contenido">
 
       {nuevo && (
         <div className="visor" onClick={() => !cargando && cerrarNuevo()} role="dialog" aria-modal="true" aria-labelledby="nuevo-libro-titulo">
@@ -459,7 +463,8 @@ function Libros({ libros, aviso, refrescar }) {
           </div>
         </div>
       )}
-    </section>
+      </section>
+    </div>
   );
 }
 
