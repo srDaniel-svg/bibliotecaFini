@@ -86,7 +86,9 @@ app.get('/api/libros', wrap(async (_q, res) =>
 
 app.post('/api/libros', wrap(async (req, res) => {
   let { titulo, autor, stock, portada_url, imagen_base64 } = req.body;
-  if (!titulo) throw new Error('El título es obligatorio');
+  if (!titulo || !titulo.trim()) throw new Error('El título es obligatorio');
+  titulo = titulo.trim();
+  const incremento = parseInt(stock) || 0;
 
   // Si enviaron una imagen en Base64, subirla directamente a Cloudinary
   if (imagen_base64 && process.env.CLOUDINARY_CLOUD_NAME) {
@@ -100,16 +102,61 @@ app.post('/api/libros', wrap(async (req, res) => {
     }
   }
 
-  await run(
-    'INSERT INTO Libros (titulo, autor, stock, portada_url) VALUES (@titulo, @autor, @stock, @portada_url)',
+  // Buscar si ya existe un libro con el mismo título (insensible a mayúsculas y espacios extremos)
+  const existentes = await run(
+    'SELECT TOP 1 id_libro, titulo, autor, stock, portada_url FROM Libros WHERE LOWER(LTRIM(RTRIM(titulo))) = LOWER(@t)',
+    { t: titulo }
+  );
+
+  if (existentes && existentes.length > 0) {
+    const libroExistente = existentes[0];
+    const nuevoStock = (libroExistente.stock || 0) + incremento;
+    const autorFinal = (autor && autor.trim()) ? autor.trim() : (libroExistente.autor || null);
+    const portadaFinal = portada_url || libroExistente.portada_url || null;
+
+    await run(
+      `UPDATE Libros 
+       SET stock = @nuevoStock,
+           autor = COALESCE(@autorFinal, autor),
+           portada_url = COALESCE(@portadaFinal, portada_url)
+       WHERE id_libro = @id`,
+      {
+        nuevoStock,
+        autorFinal,
+        portadaFinal,
+        id: libroExistente.id_libro,
+      }
+    );
+
+    return res.json({
+      ok: true,
+      actualizado: true,
+      id_libro: libroExistente.id_libro,
+      titulo: libroExistente.titulo,
+      nuevoStock,
+      portada_url: portadaFinal,
+      mensaje: `Se sumaron ${incremento} ejemplares a "${libroExistente.titulo}" (Total: ${nuevoStock})`,
+    });
+  }
+
+  // Si es un libro nuevo, insertarlo
+  const ins = await run(
+    'INSERT INTO Libros (titulo, autor, stock, portada_url) OUTPUT INSERTED.id_libro VALUES (@titulo, @autor, @stock, @portada_url)',
     {
       titulo,
-      autor,
-      stock: parseInt(stock) || 0,
+      autor: autor && autor.trim() ? autor.trim() : null,
+      stock: incremento,
       portada_url: portada_url || null,
     }
   );
-  res.json({ ok: true, portada_url });
+
+  res.json({
+    ok: true,
+    actualizado: false,
+    id_libro: ins[0]?.id_libro,
+    portada_url,
+    mensaje: `Libro "${titulo}" agregado al catálogo`,
+  });
 }));
 
 // Endpoint auxiliar para subir imagen a Cloudinary por separado si se desea

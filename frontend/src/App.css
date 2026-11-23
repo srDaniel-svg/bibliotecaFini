@@ -1354,50 +1354,115 @@ html.dark .preview-chip {
 }
 
 /* ==================== ENCABEZADO DEL CATÁLOGO ==================== */
-.catalogo-head {
+.catalogo-wrapper {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+  flex-direction: column;
   gap: 20px;
+}
+
+.catalogo-banner {
+  background: #ffffff;
+  border: 1px solid var(--borde-suave);
+  border-radius: 16px;
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
   flex-wrap: wrap;
-  margin-bottom: 18px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+}
+
+.catalogo-banner-info {
+  flex: 1;
+  min-width: 260px;
 }
 
 .catalogo-eyebrow {
   display: block;
-  color: var(--azul-primary);
-  font-size: 0.72rem;
+  color: #2563eb;
+  font-size: 0.76rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   margin-bottom: 6px;
 }
 
-.catalogo-head h2 {
-  font-size: 1.9rem;
-  letter-spacing: -0.02em;
+.catalogo-titulo {
+  margin: 0 0 6px 0;
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  color: var(--texto-oscuro);
 }
 
-.catalogo-head p {
+.catalogo-desc {
   margin: 0;
   color: var(--texto-mutado);
-  font-size: 0.92rem;
+  font-size: 0.94rem;
+  line-height: 1.45;
 }
 
 .btn-agregar {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 12px 22px;
+  padding: 12px 24px;
   border-radius: 10px;
+  background: #1d4ed8;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35);
+  white-space: nowrap;
+  transition: all 0.2s ease;
 }
 
-.btn-agregar span {
-  font-size: 1.2rem;
-  line-height: 1;
+.btn-agregar:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
 }
 
-html.dark .catalogo-eyebrow { color: #93c5fd; }
+/* Modo oscuro cristalizado para el banner */
+html.dark .catalogo-banner {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%),
+              rgba(10, 20, 42, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.22);
+}
+
+html.dark .catalogo-eyebrow {
+  color: #60a5fa;
+  text-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
+}
+
+html.dark .catalogo-titulo {
+  color: #ffffff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+html.dark .catalogo-desc {
+  color: #cbd5e1;
+}
+
+html.dark .btn-agregar {
+  background: #2563eb;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.45);
+}
+
+html.dark .btn-agregar:hover {
+  background: #3b82f6;
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.55);
+}
 
 /* ==================== MODAL: AGREGAR LIBRO ==================== */
 .modal-libro {
@@ -1528,6 +1593,56 @@ html.dark .modal-libro {
 .modal-libro-pie .primario {
   padding: 12px 24px;
   border-radius: 10px;
+}
+
+/* Indicadores de autocompletado y libro existente */
+.badge-portada-fija {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  text-align: center;
+}
+
+.campo-bloqueado {
+  background: rgba(148, 163, 184, 0.12) !important;
+  cursor: not-allowed;
+  opacity: 0.88;
+  border-style: dashed !important;
+}
+
+.campo-nota-auto {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.campo-nota-stock {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.82rem;
+  color: var(--texto-mutado);
+  line-height: 1.4;
+}
+
+html.dark .badge-portada-fija {
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+html.dark .campo-nota-auto {
+  color: #93c5fd;
+}
+
+html.dark .campo-bloqueado {
+  background: rgba(30, 41, 59, 0.65) !important;
 }
 
 .btn-cancelar {

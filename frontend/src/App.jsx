@@ -275,8 +275,34 @@ function Libros({ libros, aviso, refrescar }) {
 
   const cerrarNuevo = () => {
     setNuevo(false);
-    setF({ titulo: '', autor: '', stock: 1, imagen_base64: '' });
+    setF({ titulo: '', autor: '', stock: 1, imagen_base64: '', portada_url: '' });
     setPreview(null);
+  };
+
+  // Detectar si el título actual coincide con un libro existente en el catálogo
+  const libroExistente = useMemo(() => {
+    const t = normalizar(f.titulo);
+    if (!t) return null;
+    return libros.find(l => normalizar(l.titulo) === t) || null;
+  }, [libros, f.titulo]);
+
+  const onTituloChange = e => {
+    const val = e.target.value;
+    const match = libros.find(l => normalizar(l.titulo) === normalizar(val));
+    if (match) {
+      setF(prev => ({
+        ...prev,
+        titulo: match.titulo,
+        autor: match.autor || '',
+        portada_url: match.portada_url || '',
+      }));
+      setPreview(match.portada_url || null);
+    } else {
+      setF(prev => ({
+        ...prev,
+        titulo: val,
+      }));
+    }
   };
 
   const onSeleccionarImagen = e => {
@@ -307,8 +333,8 @@ function Libros({ libros, aviso, refrescar }) {
     e.preventDefault();
     setCargando(true);
     try {
-      await api('/api/libros', 'POST', f);
-      aviso('ok', f.imagen_base64 ? 'Libro agregado con portada en Cloudinary ☁️' : 'Libro agregado al catálogo');
+      const res = await api('/api/libros', 'POST', f);
+      aviso('ok', res.mensaje || (f.imagen_base64 ? 'Libro agregado con portada en Cloudinary ☁️' : 'Libro guardado con éxito'));
       cerrarNuevo();
     } catch (er) {
       aviso('err', er.message);
@@ -318,25 +344,33 @@ function Libros({ libros, aviso, refrescar }) {
     refrescar();
   };
   return (
-    <section>
-      <div className="catalogo-head">
-        <div>
-          <span className="catalogo-eyebrow">Colección institucional</span>
-          <h2>Catálogo de libros</h2>
-          <p>Consulta la colección, revisa existencias y registra nuevos ejemplares con su portada.</p>
+    <div className="catalogo-wrapper">
+      <div className="catalogo-banner">
+        <div className="catalogo-banner-info">
+          <span className="catalogo-eyebrow">COLECCIÓN INSTITUCIONAL</span>
+          <h2 className="catalogo-titulo">Catálogo de libros</h2>
+          <p className="catalogo-desc">
+            Consulta la colección, revisa existencias y registra nuevos ejemplares con su portada.
+          </p>
         </div>
         <button className="primario btn-agregar" onClick={() => setNuevo(true)}>
-          <span aria-hidden="true">+</span> Agregar libro
+          + Agregar libro
         </button>
       </div>
+
+      <section className="catalogo-contenido">
 
       {nuevo && (
         <div className="visor" onClick={() => !cargando && cerrarNuevo()} role="dialog" aria-modal="true" aria-labelledby="nuevo-libro-titulo">
           <form className="modal-libro" onClick={e => e.stopPropagation()} onSubmit={guardar}>
             <div className="modal-libro-head">
               <div>
-                <span className="catalogo-eyebrow">Nuevo registro</span>
-                <h3 id="nuevo-libro-titulo">Agregar libro al catálogo</h3>
+                <span className="catalogo-eyebrow">
+                  {libroExistente ? `Libro existente · ${libroExistente.stock} disp. actuales` : 'Nuevo registro'}
+                </span>
+                <h3 id="nuevo-libro-titulo">
+                  {libroExistente ? 'Aumentar stock disponible' : 'Agregar libro al catálogo'}
+                </h3>
               </div>
               <button type="button" className="modal-libro-cerrar" onClick={cerrarNuevo} disabled={cargando} aria-label="Cerrar">×</button>
             </div>
@@ -345,10 +379,12 @@ function Libros({ libros, aviso, refrescar }) {
               <div className="modal-libro-portada">
                 <Portada
                   titulo={f.titulo || 'Título del libro'}
-                  autor={f.autor || 'Nombre del autor'}
-                  portada_url={preview}
+                  autor={f.autor || (libroExistente ? libroExistente.autor : 'Nombre del autor')}
+                  portada_url={preview || (libroExistente ? libroExistente.portada_url : null)}
                 />
-                {preview ? (
+                {libroExistente ? (
+                  <span className="badge-portada-fija">✓ Portada del catálogo</span>
+                ) : preview ? (
                   <div className="modal-libro-acciones-img">
                     <label className="btn-upload-portada">
                       Cambiar
@@ -365,7 +401,7 @@ function Libros({ libros, aviso, refrescar }) {
                     <input type="file" accept="image/jpeg,image/png,image/webp" onChange={onSeleccionarImagen} hidden />
                   </label>
                 )}
-                <small>JPG, PNG o WebP</small>
+                {!libroExistente && <small>JPG, PNG o WebP</small>}
               </div>
 
               <div className="modal-libro-campos">
@@ -373,35 +409,61 @@ function Libros({ libros, aviso, refrescar }) {
                   Título del libro
                   <input
                     autoFocus
-                    placeholder="Ej. El laberinto de la soledad"
+                    placeholder="Escribe o selecciona un título…"
                     value={f.titulo}
-                    onChange={e => setF({ ...f, titulo: e.target.value })}
+                    onChange={onTituloChange}
+                    list="titulos-catalogo-sugerencias"
                     required
                   />
+                  <datalist id="titulos-catalogo-sugerencias">
+                    {libros.map(l => (
+                      <option key={l.id_libro} value={l.titulo}>
+                        {l.autor ? `de ${l.autor} (${l.stock} disp.)` : `(${l.stock} disp.)`}
+                      </option>
+                    ))}
+                  </datalist>
                 </label>
+
                 <label>
                   Autor
                   <input
                     placeholder="Nombre completo"
                     value={f.autor}
                     onChange={e => setF({ ...f, autor: e.target.value })}
+                    disabled={!!libroExistente}
+                    className={libroExistente ? 'campo-bloqueado' : ''}
                   />
+                  {libroExistente && (
+                    <small className="campo-nota-auto">🔒 Autocompletado del catálogo existente</small>
+                  )}
                 </label>
+
                 <label>
-                  Ejemplares
+                  {libroExistente ? 'Libros disponibles a sumar (+)' : 'Libros disponibles'}
                   <input
                     type="number"
-                    min="0"
+                    min="1"
                     value={f.stock}
                     onChange={e => setF({ ...f, stock: e.target.value })}
+                    required
                   />
+                  {libroExistente && (
+                    <small className="campo-nota-stock">
+                      Se sumará a los <b>{libroExistente.stock}</b> actuales (Resultante: <b>{(libroExistente.stock || 0) + (parseInt(f.stock) || 0)}</b> disponibles)
+                    </small>
+                  )}
                 </label>
+
                 <div className="modal-libro-pie">
                   <button type="button" className="btn-cancelar" onClick={cerrarNuevo} disabled={cargando}>
                     Cancelar
                   </button>
                   <button className="primario" disabled={cargando}>
-                    {cargando ? 'Subiendo…' : '+ Guardar libro'}
+                    {cargando
+                      ? 'Guardando…'
+                      : libroExistente
+                      ? `+ Sumar ${f.stock || 1} al stock`
+                      : '+ Guardar libro'}
                   </button>
                 </div>
               </div>
@@ -452,14 +514,15 @@ function Libros({ libros, aviso, refrescar }) {
               <p>{abierto.autor}</p>
               <span className={'tag ' + (abierto.stock > 0 ? 'hecho' : 'activo')}>
                 {abierto.stock > 0
-                  ? `${abierto.stock} ejemplar${abierto.stock === 1 ? '' : 'es'} disponible${abierto.stock === 1 ? '' : 's'}`
-                  : 'Sin ejemplares disponibles'}
+                  ? `${abierto.stock} libro${abierto.stock === 1 ? '' : 's'} disponible${abierto.stock === 1 ? '' : 's'}`
+                  : 'Sin libros disponibles'}
               </span>
             </div>
           </div>
         </div>
       )}
-    </section>
+      </section>
+    </div>
   );
 }
 
@@ -726,7 +789,7 @@ export default function App() {
           </div>
 
           <div className="kpi-card">
-            <span className="kpi-title">Ejemplares Disponibles</span>
+            <span className="kpi-title">Libros Disponibles</span>
             <div className="kpi-value-row">
               <span className="kpi-number">{stats.stockTotal}</span>
               <span className="kpi-badge ok">En stock</span>
