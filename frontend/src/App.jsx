@@ -439,7 +439,7 @@ function Libros({ libros, aviso, refrescar }) {
                 </label>
 
                 <label>
-                  {libroExistente ? 'Disponibles a sumar (+)' : 'Disponibles'}
+                  {libroExistente ? 'Libros disponibles a sumar (+)' : 'Libros disponibles'}
                   <input
                     type="number"
                     min="1"
