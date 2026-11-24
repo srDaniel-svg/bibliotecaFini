@@ -514,8 +514,8 @@ function Libros({ libros, aviso, refrescar }) {
               <p>{abierto.autor}</p>
               <span className={'tag ' + (abierto.stock > 0 ? 'hecho' : 'activo')}>
                 {abierto.stock > 0
-                  ? `${abierto.stock} ejemplar${abierto.stock === 1 ? '' : 'es'} disponible${abierto.stock === 1 ? '' : 's'}`
-                  : 'Sin ejemplares disponibles'}
+                  ? `${abierto.stock} libro${abierto.stock === 1 ? '' : 's'} disponible${abierto.stock === 1 ? '' : 's'}`
+                  : 'Sin libros disponibles'}
               </span>
             </div>
           </div>
@@ -789,7 +789,7 @@ export default function App() {
           </div>
 
           <div className="kpi-card">
-            <span className="kpi-title">Ejemplares Disponibles</span>
+            <span className="kpi-title">Libros Disponibles</span>
             <div className="kpi-value-row">
               <span className="kpi-number">{stats.stockTotal}</span>
               <span className="kpi-badge ok">En stock</span>
