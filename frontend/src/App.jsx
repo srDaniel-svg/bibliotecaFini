@@ -392,7 +392,7 @@ function Libros({ libros, aviso, refrescar }) {
                   />
                 </label>
                 <label>
-                  Ejemplares
+                  Disponibles
                   <input
                     type="number"
                     min="0"
